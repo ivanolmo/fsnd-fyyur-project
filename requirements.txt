@@ -1,3 +1,4 @@
+wtforms
 flask
 fabric
 babel
