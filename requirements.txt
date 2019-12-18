@@ -1,3 +1,4 @@
+sqlalchemy
 wtforms
 flask
 fabric
