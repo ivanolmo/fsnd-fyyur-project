@@ -26,7 +26,7 @@
 		<p>
 			<i class="fab fa-facebook-f"></i> {% if artist.facebook_link %}<a href="{{ artist.facebook_link }}" target="_blank">{{ artist.facebook_link }}</a>{% else %}No Facebook Link{% endif %}
         </p>
-		{% if artist.seeking_venue %}
+		{% if artist.is_seeking_venue %}
 		<div class="seeking">
 			<p class="lead">Currently seeking performance venues</p>
 			<div class="description">
@@ -44,9 +44,9 @@
 	</div>
 </div>
 <section>
-	<h2 class="monospace">{{ artist.upcoming_shows_count }} Upcoming {% if artist.upcoming_shows_count == 1 %}Show{% else %}Shows{% endif %}</h2>
+	<h2 class="monospace">{{ artist.artist_upcoming_shows_count }} Upcoming {% if artist.artist_upcoming_shows_count == 1 %}Show{% else %}Shows{% endif %}</h2>
 	<div class="row">
-		{%for show in artist.upcoming_shows %}
+		{%for show in artist.artist_upcoming_shows %}
 		<div class="col-sm-4">
 			<div class="tile tile-show">
 				<img src="{{ show.venue_image_link }}" alt="Show Venue Image" />
@@ -58,9 +58,9 @@
 	</div>
 </section>
 <section>
-	<h2 class="monospace">{{ artist.past_shows_count }} Past {% if artist.past_shows_count == 1 %}Show{% else %}Shows{% endif %}</h2>
+	<h2 class="monospace">{{ artist.artist_past_shows_count }} Past {% if artist.artist_past_shows_count == 1 %}Show{% else %}Shows{% endif %}</h2>
 	<div class="row">
-		{%for show in artist.past_shows %}
+		{%for show in artist.artist_past_shows %}
 		<div class="col-sm-4">
 			<div class="tile tile-show">
 				<img src="{{ show.venue_image_link }}" alt="Show Venue Image" />

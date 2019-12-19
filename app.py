@@ -17,7 +17,7 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
-from models import Venue, Artist, Show
+from models import *
 
 # ----------------------------------------------------------------------------#
 # App Config.
@@ -60,68 +60,47 @@ def index():
 
 @app.route('/venues')
 def venues():
-    all_venues = Venue.query.distinct(Venue.city, Venue.state).all()
-    unique_venues = [(venue.city, venue.state) for venue in all_venues]
+    locations = Venue.query.distinct(Venue.city, Venue.state).all()
+    data = []
 
-
-    # data = []
-    #
-    # for area in all_areas:
-    #     area_venues = Venue.query.filter_by(state=area.state).filter_by(
-    #         city=area.city).all()
-    #     venue_data = []
-    #     for venue in area_venues:
-    #         venue_data.append({
-    #             "id": venue.id,
-    #             "name": venue.name,
-    #             "num_upcoming_shows": len(
-    #                 db.session.query(Show).filter(Show.venue_id == 1).filter(
-    #                     Show.start_time > datetime.now()).all())
-    #         })
-    #     data.append({
-    #         "city": area.city,
-    #         "state": area.state,
-    #         "venues": venue_data
-    #     })
+    for location in locations:
+        location_venues = Venue.query.filter_by(
+            state=location.state).filter_by(
+            city=location.city).all()
+        venues = []
+        for venue in location_venues:
+            venues.append({
+                "id": venue.id,
+                "name": venue.name,
+                "upcoming_shows": venue.venue_upcoming_shows(),
+                "num_upcoming_shows": len(venue.venue_upcoming_shows())
+            })
+        for v in location_venues:
+            data.append({
+                "city": v.city,
+                "state": v.state,
+                "venues": venues
+            })
 
     return render_template('pages/venues.html', areas=data)
-    # # TODO: replace with real venues data.
-    # #       num_shows should be aggregated based on number of upcoming shows
-    # #       per venue.
-    # # initialize empty data list that will returned at end of function
-    # data = []
-    #
-    # # get all venues
-    # all_venues = Venue.query.distinct(Venue.city, Venue.state).all()
-    #
-    # for venue in all_venues:
-    #     location_venues = Venue.query.filter(venue.city).all()
-    #     venue_data = {
-    #         "city": venue.city,
-    #         "state": venue.state,
-    #         "venues": location_venues
-    #     }
-    #     data.append(venue_data)
-    #     print(venue_data)
-    #
-    # return render_template('pages/venues.html', areas=data)
 
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-    # TODO: implement search on artists with partial string search. Ensure it
-    #  is case-insensitive.
-    # search for Hop should return "The Musical Hop".
-    # search for "Music" should return "The Musical Hop" and "Park Square Live
-    # Music & Coffee"
+    search_term = request.form.get('search_term', '')
+    search_results = Venue.query.filter(Venue.name.ilike
+                                        (f'%{search_term}%')).all()
+    print(len(search_results))
+    print(search_results)
+    print(search_term)
+
     response = {
-        "count": 1,
-        "data": [{
-            "id": 2,
-            "name": "The Dueling Pianos Bar",
-            "num_upcoming_shows": 0,
-        }]
+        "count": len(search_results),
+        "data": [venue for venue in search_results]
     }
+
+    print(response)
+
     return render_template('pages/search_venues.html', results=response,
                            search_term=request.form.get('search_term', ''))
 
@@ -129,21 +108,10 @@ def search_venues():
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
     # shows the venue page with the given venue_id
-    # TODO: replace with real venue data from the venues table, using venue_id
-    data1 = {
-        # used to be pretend data in here
-    }
 
-    data2 = {
-        # used to be pretend data in here
-    }
+    venue = Venue.query.get(venue_id)
+    data = venue.serialize()
 
-    data3 = {
-        # used to be pretend data in here
-    }
-
-    data = list(filter(lambda d: d['id'] == venue_id, [data1, data2, data3]))[
-        0]
     return render_template('pages/show_venue.html', venue=data)
 
 
