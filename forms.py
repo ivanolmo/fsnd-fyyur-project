@@ -123,7 +123,7 @@ class VenueForm(Form):
         'address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone', validators=[validate_phone]
+        'phone', validators=[DataRequired(), validate_phone]
     )
     image_link = StringField(
         'image_link', validators=[URL(), Optional()]
@@ -134,6 +134,9 @@ class VenueForm(Form):
     )
     facebook_link = StringField(
         'facebook_link', validators=[URL(), Optional()]
+    )
+    website = StringField(
+        'website', validators=[URL(), Optional()]
     )
     is_seeking_talent = BooleanField(
         'is_seeking_talent'
@@ -155,7 +158,7 @@ class ArtistForm(Form):
         choices=all_states
     )
     phone = StringField(
-        'phone', validators=[validate_phone]
+        'phone', validators=[DataRequired(), validate_phone]
     )
     image_link = StringField(
         'image_link'
@@ -166,6 +169,9 @@ class ArtistForm(Form):
     )
     facebook_link = StringField(
         'facebook_link', validators=[URL()]
+    )
+    website = StringField(
+        'website', validators=[URL(), Optional()]
     )
     is_seeking_venue = BooleanField(
         'is_seeking_venue'

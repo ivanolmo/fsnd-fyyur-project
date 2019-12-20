@@ -7,6 +7,7 @@ import sys
 
 import dateutil.parser
 import babel
+import datetime
 from flask import Flask, render_template, request, Response, flash, redirect, \
     url_for
 from flask_moment import Moment
@@ -17,7 +18,6 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
-from models import *
 
 # ----------------------------------------------------------------------------#
 # App Config.
@@ -44,6 +44,171 @@ def format_datetime(value, format='medium'):
 
 
 app.jinja_env.filters['datetime'] = format_datetime
+
+
+# ----------------------------------------------------------------------------#
+# Models.
+# ----------------------------------------------------------------------------#
+
+
+class Show(db.Model):
+    __tablename__ = 'show'
+
+    id = db.Column(db.Integer, primary_key=True)
+    artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'),
+                          nullable=False)
+    venue_id = db.Column(db.Integer, db.ForeignKey('venue.id'), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+
+    def add(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.update(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'artist_id': self.artist_id,
+            'venue_id': self.venue_id,
+            'start_time': self.start_time
+        }
+
+
+class Venue(db.Model):
+    __tablename__ = 'venue'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    city = db.Column(db.String(120))
+    state = db.Column(db.String(120))
+    address = db.Column(db.String(120))
+    phone = db.Column(db.String(120))
+    genres = db.Column(db.ARRAY(db.String()))
+    image_link = db.Column(db.String(500))
+    facebook_link = db.Column(db.String(120))
+    website = db.Column(db.String(120))
+    is_seeking_talent = db.Column(db.Boolean)
+    seeking_description = db.Column(db.String(500))
+    upcoming_shows = db.relationship('Show', backref='venue', lazy=True)
+
+    def add(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.update(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'city': self.city,
+            'state': self.state,
+            'address': self.address,
+            'phone': self.phone,
+            'genres': self.genres,
+            'image_link': self.image_link,
+            'facebook_link': self.facebook_link,
+            'website': self.website,
+            'is_seeking_talent': self.is_seeking_talent,
+            'seeking_description': self.seeking_description,
+            'num_upcoming_shows': len(self.venue_upcoming_shows()),
+            'upcoming_shows': self.venue_upcoming_shows(),
+            'past_shows': self.venue_past_shows()
+        }
+
+    def venue_upcoming_shows(self):
+        return db.session.query(Show).filter(
+            Show.start_time > datetime.now(),
+            Show.venue_id == self.id).all()
+
+    def venue_upcoming_shows_count(self):
+        return len(self.venue_upcoming_shows())
+
+    def venue_past_shows(self):
+        return db.session.query(Show).filter(
+            Show.start_time < datetime.now(),
+            Show.venue_id == self.id).all()
+
+    def venue_past_shows_count(self):
+        return len(self.venue_past_shows())
+
+
+class Artist(db.Model):
+    __tablename__ = 'artist'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    city = db.Column(db.String(120))
+    state = db.Column(db.String(120))
+    address = db.Column(db.String(120))
+    phone = db.Column(db.String(120))
+    genres = db.Column(db.String(120))
+    image_link = db.Column(db.String(500))
+    facebook_link = db.Column(db.String(120))
+    website = db.Column(db.String(120))
+    is_seeking_venue = db.Column(db.Boolean)
+    seeking_description = db.Column(db.String(500))
+    upcoming_shows = db.relationship('Show', backref='artist', lazy=True)
+
+    def add(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.update(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'city': self.city,
+            'state': self.state,
+            'address': self.address,
+            'phone': self.phone,
+            'genres': self.genres,
+            'image_link': self.image_link,
+            'facebook_link': self.facebook_link,
+            'website': self.website,
+            'is_seeking_venue': self.is_seeking_venue,
+            'seeking_description': self.seeking_description,
+            'num_upcoming_shows': len(self.artist_upcoming_shows()),
+            'upcoming_shows': self.artist_upcoming_shows(),
+            'past_shows': self.artist_past_shows()
+        }
+
+    def artist_upcoming_shows(self):
+        return db.session.query().filter(
+            Show.start_time > datetime.now(),
+            Show.artist_id == self.id).all()
+
+    def artist_upcoming_shows_count(self):
+        return len(self.artist_upcoming_shows())
+
+    def artist_past_shows(self):
+        return db.session.query(Show).filter(
+            Show.start_time < datetime.now(),
+            Show.artist_id == self.id).all()
+
+    def artist_past_shows_count(self):
+        return len(self.artist_past_shows())
 
 
 # ----------------------------------------------------------------------------#
@@ -144,26 +309,30 @@ def create_venue_submission():
 
         db.session.add(new_venue)
         db.session.commit()
-        flash('Venue ' + request.form['name'] + ' was successfully listed!')
+        flash("Venue '" + request.form['name'] + "' was successfully listed!")
     except:
         db.session.rollback()
-        flash('Venue ' + request.form['name'] + ' was NOT listed!')
+        flash("Error! Venue '" + request.form['name'] + "' was NOT listed!")
         print(sys.exc_info())
     finally:
         db.session.close()
+
     return render_template('pages/home.html')
 
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-    # TODO: Complete this endpoint for taking a venue_id, and using
-    # SQLAlchemy ORM to delete a record. Handle cases where the session commit
-    # could fail.
+    try:
+        venue_to_delete = Venue.query.get(venue_id)
+        Venue.delete(venue_to_delete)
+        flash('Venue successfully deleted!')
+    except:
+        db.session.rollback()
+        flash('Error! This venue could not be deleted.')
+    finally:
+        db.session.close()
 
-    # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page,
-    # have it so that clicking that button delete it from the db then
-    # redirect the user to the homepage
-    return None
+    return redirect(url_for('index'))
 
 
 #  Artists
@@ -244,10 +413,9 @@ def edit_artist_submission(artist_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
-    form = VenueForm()
-    venue = {
-        # used to be pretend data in here
-    }
+    form = VenueForm(request.form)
+    venue = Venue.query.get(venue_id)
+
     # TODO: populate form with values from venue with ID <venue_id>
     return render_template('forms/edit_venue.html', form=form, venue=venue)
 
