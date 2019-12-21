@@ -83,23 +83,21 @@ all_genres = [
 ]
 
 
-def validate_phone(form, field):
-    try:
-        input_number = phonenumbers.parse(field.data, 'US')
-        if not (phonenumbers.is_valid_number(input_number)):
-            raise ValidationError('Phone number is invalid, please try again.')
-    except Exception as e:
-        raise ValidationError('Phone number is invalid, please try again.', e)
+# def validate_phone(form, field):
+#     try:
+#         input_number = phonenumbers.parse(field.data, 'US')
+#         if not (phonenumbers.is_valid_number(input_number)):
+#             raise ValidationError('Phone number is invalid, please try again.')
+#     except Exception as e:
+#         raise ValidationError('Phone number is invalid, please try again.', e)
 
 
 class ShowForm(Form):
-    artist_id = IntegerField(
-        'artist_id',
-        validators=[DataRequired()]
+    artist_id = StringField(
+        'artist_id'
     )
-    venue_id = IntegerField(
-        'venue_id',
-        validators=[DataRequired()]
+    venue_id = StringField(
+        'venue_id'
     )
     start_time = DateTimeField(
         'start_time',
@@ -123,20 +121,20 @@ class VenueForm(Form):
         'address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone', validators=[DataRequired(), validate_phone]
+        'phone'
     )
     image_link = StringField(
-        'image_link', validators=[URL(), Optional()]
+        'image_link'
     )
     genres = SelectMultipleField(
         'genres', validators=[DataRequired()],
         choices=all_genres
     )
     facebook_link = StringField(
-        'facebook_link', validators=[URL(), Optional()]
+        'facebook_link', validators=[URL()]
     )
     website = StringField(
-        'website', validators=[URL(), Optional()]
+        'website', validators=[URL()]
     )
     is_seeking_talent = BooleanField(
         'is_seeking_talent'
@@ -158,7 +156,7 @@ class ArtistForm(Form):
         choices=all_states
     )
     phone = StringField(
-        'phone', validators=[DataRequired(), validate_phone]
+        'phone'
     )
     image_link = StringField(
         'image_link'
@@ -171,7 +169,7 @@ class ArtistForm(Form):
         'facebook_link', validators=[URL()]
     )
     website = StringField(
-        'website', validators=[URL(), Optional()]
+        'website', validators=[URL()]
     )
     is_seeking_venue = BooleanField(
         'is_seeking_venue'
