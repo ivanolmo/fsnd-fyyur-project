@@ -1,21 +1,15 @@
 # ----------------------------------------------------------------------------#
 # Imports
 # ----------------------------------------------------------------------------#
-
-import json
-import sys
-
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response, flash, redirect, \
-    url_for
+import logging
+
+from flask import Flask, render_template, request, flash, redirect, url_for
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text, func
 from flask_migrate import Migrate
-import logging
 from logging import Formatter, FileHandler
-from flask_wtf import Form
 from forms import *
 
 # ----------------------------------------------------------------------------#
@@ -392,7 +386,7 @@ def create_show_submission():
         flash("The show was successfully listed!")
     except:
         db.session.rollback()
-        flash("Error! The show could not be listed!")
+        flash("Error! That show could not be listed!")
     finally:
         db.session.close()
 
