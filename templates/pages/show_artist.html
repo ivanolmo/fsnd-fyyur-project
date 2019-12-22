@@ -40,7 +40,7 @@
 		{% endif %}
 	</div>
 	<div class="col-sm-6">
-		<img src="{{ artist.image_link }}" alt="Venue Image" />
+		<img src="{{ artist.image_link }}" alt="Artist Image" />
 	</div>
 </div>
 <section>
@@ -51,7 +51,7 @@
 			<div class="tile tile-show">
 				<img src="{{ show.venue_image_link }}" alt="Show Venue Image" />
 				<h5><a href="/venues/{{ show.venue_id }}">{{ show.venue_name }}</a></h5>
-				<h6>{{ show.start_time|datetime('full') }}</h6>
+				<h6>{{ show.start_time }}</h6>
 			</div>
 		</div>
 		{% endfor %}
@@ -65,12 +65,32 @@
 			<div class="tile tile-show">
 				<img src="{{ show.venue_image_link }}" alt="Show Venue Image" />
 				<h5><a href="/venues/{{ show.venue_id }}">{{ show.venue_name }}</a></h5>
-				<h6>{{ show.start_time|datetime('full') }}</h6>
+				<h6>{{ show.start_time }}</h6>
 			</div>
 		</div>
 		{% endfor %}
 	</div>
 </section>
+<div class="row">
+    <div class="col-sm-3">
+        <a href="/artists/{{ artist.id }}/edit">
+            <button class="btn btn-primary btn-lg" id="edit-artist">Edit Artist</button></a>
+    </div>
+    <div class="col-sm-3">
+        <button class="btn btn-primary btn-lg" id="delete-artist" data-id="{{ artist.id }}">Delete Artist</button>
+    </div>
+</div>
+<script>
+    const delBtn = document.getElementById('delete-artist');
+    delBtn.onclick = function(e) {
+        const artistId = e.target.dataset.id;
+        fetch('/artists/' + artistId, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            window.location.replace('/');
+        })
+    }
+</script>
 
 {% endblock %}
-

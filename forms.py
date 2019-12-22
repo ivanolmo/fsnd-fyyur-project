@@ -4,7 +4,6 @@ from wtforms import StringField, SelectField, SelectMultipleField, \
     DateTimeField, BooleanField, IntegerField
 from wtforms.validators import DataRequired, AnyOf, URL, Optional, \
     ValidationError
-import phonenumbers
 
 all_states = [
     ('AL', 'AL'),
@@ -81,15 +80,6 @@ all_genres = [
     ('Soul', 'Soul'),
     ('Other', 'Other')
 ]
-
-
-# def validate_phone(form, field):
-#     try:
-#         input_number = phonenumbers.parse(field.data, 'US')
-#         if not (phonenumbers.is_valid_number(input_number)):
-#             raise ValidationError('Phone number is invalid, please try again.')
-#     except Exception as e:
-#         raise ValidationError('Phone number is invalid, please try again.', e)
 
 
 class ShowForm(Form):
