@@ -10,6 +10,7 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from logging import Formatter, FileHandler
+from sqlalchemy.exc import IntegrityError
 from forms import *
 
 # ----------------------------------------------------------------------------#
@@ -384,6 +385,10 @@ def create_show_submission():
 
         Show.add(new_show)
         flash("The show was successfully listed!")
+    except IntegrityError:
+        db.session.rollback()
+        flash("Error! The show could not be listed because that venue or "
+          "artist doesn't exist!")
     except:
         db.session.rollback()
         flash("Error! That show could not be listed!")
