@@ -12,12 +12,8 @@ class Show(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'),
                           nullable=False)
-    # artist = db.relationship(
-    #     'artist', backref=db.backref('show', cascade='all,delete'))
 
     venue_id = db.Column(db.Integer, db.ForeignKey('venue.id'), nullable=False)
-    # venue = db.relationship(
-    #     'venue', backref=db.backref('show', cascade='all,delete'))
 
     start_time = db.Column(db.DateTime, nullable=False,
                            default=datetime.datetime.now)

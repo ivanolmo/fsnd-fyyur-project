@@ -28,7 +28,6 @@ app.config.from_object('config')
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-
 # ----------------------------------------------------------------------------#
 # Models
 # ----------------------------------------------------------------------------#
@@ -87,6 +86,10 @@ def venues():
             'state': location.state,
             'venues': all_venues
         })
+
+        # empty the list after we're done iterating over it or venues screen
+        # will have duplicates
+        all_venues = []
 
     return render_template('pages/venues.html', areas=data)
 
@@ -188,18 +191,14 @@ def artists():
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-    # TODO: implement search on artists with partial string search. Ensure it
-    #  is case-insensitive.
-    # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The
-    # Wild Sax Band". search for "band" should return "The Wild Sax Band".
+    search_term = request.form.get('search_term', '')
+    search_results = Artist.query.filter(Artist.name.ilike
+                                         (f'%{search_term}%')).all()
     response = {
-        "count": 1,
-        "data": [{
-            "id": 4,
-            "name": "Guns N Petals",
-            "num_upcoming_shows": 0,
-        }]
+        "count": len(search_results),
+        "data": [artist for artist in search_results]
     }
+
     return render_template('pages/search_artists.html', results=response,
                            search_term=request.form.get('search_term', ''))
 
@@ -356,16 +355,16 @@ def shows():
     data = []
 
     for show in shows:
-        show_artist = Artist.query.get(show.artist_id)
-        show_venue = Venue.query.get(show.venue_id)
+        artist = Artist.query.get(show.artist_id)
+        venue = Venue.query.get(show.venue_id)
         data.append({
             'show_id': show.id,
-            'artist_id': show_artist.id,
-            'artist_name': show_artist.name,
-            'venue_id': show_venue.id,
-            'venue_name': show_venue.name,
-            'artist_image_link': show_artist.image_link,
-            'start_time': show.start_time.strftime("%m-%d-%Y, %H:%M")
+            'artist_id': artist.id,
+            'artist_name': artist.name,
+            'venue_id': venue.id,
+            'venue_name': venue.name,
+            'artist_image_link': artist.image_link,
+            'start_time': show.start_time.strftime("%m-%d-%Y @ %H:%M")
         })
 
     return render_template('pages/shows.html', shows=data)
@@ -424,7 +423,6 @@ if not app.debug:
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
     app.logger.info('errors')
-
 
 # ----------------------------------------------------------------------------#
 # Launch.
