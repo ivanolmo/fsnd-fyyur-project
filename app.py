@@ -359,7 +359,7 @@ def shows():
             'venue_id': venue.id,
             'venue_name': venue.name,
             'artist_image_link': artist.image_link,
-            'start_time': show.start_time.strftime("%m-%d-%Y @ %H:%M")
+            'start_time': show.start_time.strftime("%m-%d-%Y %H:%M")
         })
 
     return render_template('pages/shows.html', shows=data)
@@ -367,7 +367,6 @@ def shows():
 
 @app.route('/shows/create')
 def create_shows():
-    # DONT  TOUCH
     form = ShowForm()
     return render_template('forms/new_show.html', form=form)
 
